@@ -127,6 +127,7 @@
     {"source": "Sevilla", "target": "Huelva", "imd": 30},
     {"source": "Sevilla", "target": "Badajoz", "imd": 15},
     {"source": "Cáceres", "target": "Badajoz", "imd": 12},
-    {"source": "Cáceres", "target": "Salamanca", "imd": 8}
+    {"source": "Cáceres", "target": "Salamanca", "imd": 8},
+    {"source": "Cáceres", "target": "Toledo", "imd": 15}
   ]
 }
