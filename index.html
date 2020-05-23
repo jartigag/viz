@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script>
+    d3.json("datos.json").then(function(data) {
+
+        var escalaColor = d3.scaleOrdinal()
+            .domain([1, 15]) // 15 comunidades autónomas
+            // 15 colores claros, entre rojo-amarillo-verde-azul-violeta:
+            .range(["#E4717A", "#F28773", "#FBCA7F", "#FA8072", "#FBEC5D",
+                "#75B313", "#009846", "#9BFAB0", "#9FD5D1", "#0CB7F2",
+                "#CCCCFF", "#B57EDC", "#FBCA7F", "#E0B0FF", "#56070C"
+            ]);
+
+        var tooltip = d3.select("body")
+            .append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+        var layout = d3.forceSimulation()
+            .force("link", d3.forceLink().id(d => d.id))
+            .force("charge", d3.forceManyBody())
+            .force("center", d3.forceCenter(300, 350))
+
+        layout
+            .nodes(data.nodes)
+            .on("tick", onTick)
+        layout
+            .force("link")
+            .links(data.links)
+
+        // responsive svg:
+        // https://bl.ocks.org/veltman/5cd1ba0b3c623e7b5146
+        var svg = d3.select("div#container1")
+            .append("svg")
+            .attr("width", "80%")
+            .attr("height", 600)
+            .attr("preserveAspectRatio", "xMidYMid meet")
+            .attr("viewBox", "0 0 800 800")
+            .classed("svg-content", true)
+            .style('background', '#F6F6F6')
+            // reflejar vertical y horizontalmente para colocar las capitales en su posición natural
+            // (también escalar un 150%):
+            .attr("transform", "scale(-1.5,-1.5)")
+
+        var links = svg
+            .append("g")
+            .selectAll("line")
+            .data(data.links)
+            .enter()
+            .append("line")
+            .style("stroke", "#aaa")
+            .attr("stroke-width", d => d.imd / 5)
+            .style("stroke", "#aaa")
+
+        var nodes = svg
+            .append("g")
+            .selectAll("circle")
+            .data(data.nodes)
+            .enter()
+
+            .append("circle")
+            .attr("r", 5)
+
+            .attr("fill", d => escalaColor(d.group))
+            .attr("fill-opacity", .6)
+
+            .on("mouseover", function(d) {
+                pintarTooltip(d.id)
+                d3.select(this).attr("fill-opacity", 1);
+            })
+            .on("mouseout", function() {
+                borrarTooltip()
+                d3.select(this).attr("fill-opacity", .6);
+            })
+
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended))
+
+        var tooltip = d3.select("body")
+            .append("div")
+            .attr("class", "tooltip")
+
+        function pintarTooltip(value) {
+            tooltip
+                .text(value)
+                .style("top", d3.event.pageY + "px")
+                .style("left", d3.event.pageX + "px")
+                .transition()
+                .style("opacity", 1)
+        }
+
+        function borrarTooltip() {
+            tooltip
+                .transition()
+                .style("opacity", 0)
+        }
+
+        function onTick() {
+            nodes
+                .attr("cx", d => d.x)
+                .attr("cy", d => d.y)
+
+            links
+                .attr("x1", d => d.source.x)
+                .attr("x2", d => d.target.x)
+                .attr("y1", d => d.source.y)
+                .attr("y2", d => d.target.y)
+        }
+
+        function dragstarted(d) {
+            if (!d3.event.active) layout.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(d) {
+            d.fx = d3.event.x;
+            d.fy = d3.event.y;
+        }
+
+        function dragended(d) {
+            if (!d3.event.active) layout.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+    })
+    </script>
+</head>
+
+<body>
+    <style>
+    .tooltip {
+        position: absolute;
+        background: white;
+        pointer-events: none;
+    }
+
+    /* https://chartio.com/resources/tutorials/how-to-resize-an-svg-when-the-window-is-resized-in-d3-js/ */
+    .svg-container {
+        display: inline-block;
+        position: relative;
+        width: 100%;
+    }
+
+    .svg-content {
+        display: inline-block;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+    </style>
+    <div id="container1" class="svg-container"></div>
+    <footer style="position: fixed; bottom: 5px; right: 5px;">
+        <a href="https://cdn.mitma.gob.es/portal-web-drupal/Mapas_de_trafico/mapa_imd_2018.pdf">Datos de 2018</a>, extraídos del <a href="https://www.mitma.gob.es/carreteras/trafico-velocidades-y-accidentes-mapa-estimacion-y-evolucion/mapas-de-trafico/">Ministerio de Transportes, Movilidad y Agenda Urbana (España)</a>
+    </footer>
+</body>
+
+</html>
