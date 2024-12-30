@@ -1,4 +1,4 @@
-# data-viz projects
+# data visualization projects
 
 - [https://javier.artiga.es/tfm](https://javier.artiga.es/tfm): Caracterización de equipos informáticos mediante clustering en una red empresarial.
     - Python, AWK, TeX, R
