@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script>
+        d3.json("datos.json").then( function (datos){
+
+            var height = 300
+            var width = 1200
+
+            var margin  = {top: 70, bottom: 100, left: 40, right: 50}
+
+            // ancho de cada barra y espacio entre barras:
+            var barWidth = 10
+            var barOffset = 2
+
+            ////////////////
+            // 1er gráfico (Temperaturas medias Máximas)
+            ////////////////
+
+            // RESPONSIVE:
+            // https://bl.ocks.org/veltman/5cd1ba0b3c623e7b5146
+            var elemSVGtempsMax = d3.select("div#container1")
+                .append("svg")
+                .attr("width","100%")
+                .attr("height",height)
+                .attr("preserveAspectRatio", "xMidYMid meet") //xMidYMid=centrado, xMinYMin=izqda, xMaxMax=dcha
+                .attr("viewBox", "0 0 "+width+" "+height)
+                .classed("svg-content", true)
+                .style('background', '#F6F6F6')
+
+            var scaleX = d3.scaleLinear()
+                .domain([0,datos.length-1])
+                .range([0 + margin.left, width - margin.right])
+
+            tempsMedMax = [] // hay manera más directa de hacer esto?
+            for (i=0; i<datos.length; i++) {
+                tempsMedMax.push(d3.max(datos[i].temMedMax)/10)
+            }
+            var scaleYMaxTemps = d3.scaleLinear()
+                .domain([0,d3.max(tempsMedMax)])
+                .range([height-margin.bottom, margin.top])
+            // escala de colores para temperaturas máximas:
+            var maxTempColorScale = d3.scaleLinear()
+                .domain(tempsMedMax)
+                // de amarillo a rojo:
+                .range(["#ecca00", "#ecca00", "#ec5300", "#ec2400", "#ec0000"]);
+
+            ubics = [] // hay manera más directa de hacer esto?
+            for (i=0; i<datos.length; i++) {
+                ubics.push(datos[i].ubicacion)
+            }
+            var scaleXAxis = d3.scalePoint()
+                .domain(ubics)
+                .range([0 + margin.left, width - margin.right])
+
+            // definir eje X:
+            var xAxis = d3.axisBottom(scaleX)
+                // poner ticks:
+                .scale(scaleXAxis)
+                .ticks(datos.length)
+
+            // pintar eje X
+            elemSVGtempsMax
+                .append("g")
+                .attr("transform","translate (0," + (height - margin.bottom) + ")")
+                .call(xAxis)
+                // inclinar etiquetas del eje X:
+                .selectAll("text")
+                  .style("text-anchor", "end")
+                  .attr("dx", "-.8em")
+                  .attr("dy", ".15em")
+                  .attr("transform", "rotate(-65)");
+
+            // definir eje y:
+            var yAxisMax = d3.axisLeft(scaleYMaxTemps)
+
+            // pintar eje y:
+            elemSVGtempsMax
+                //estas dos líneas antes del .call(yAxisMax) MUEVEN EL EJE
+                .append("g")
+                .attr("transform","translate (" + margin.left + ",0)")
+                .call(yAxisMax)
+            // título eje y:
+            elemSVGtempsMax.append("text")
+                .attr("x", -margin.left-20)
+                .attr("y", margin.top-10)
+                .style("text-anchor", "middle")
+                .text("Temp. media Máxima (ºC)");
+
+            elemSVGtempsMax
+                .selectAll("rect")
+                .data(datos)
+                .enter()
+                .append ("rect")
+                .attr("width", barWidth)
+                .attr('height', function (data, i) {
+                    return (height - margin.bottom)-scaleYMaxTemps(tempsMedMax[i])
+                })
+                .attr('x', function (data, i) {
+                    return scaleX(i)
+                })
+                .attr('y', function (data, i) {
+                    return scaleYMaxTemps(tempsMedMax[i])
+                })
+                // color de las barras:
+                .attr("fill", function (data, i) {
+                    return maxTempColorScale(tempsMedMax[i])
+                })
+                .attr("fill-opacity", .6)
+                .on("mouseover", function (data, i) {
+                    pintarTooltip(data.ubicacion+": "+tempsMedMax[i])
+                    d3.select(this).attr("fill-opacity", 1);
+                })
+                .on("mouseout", function () {
+                    borrarTooltip()
+                    d3.select(this).attr("fill-opacity", .6);
+                })
+
+            ////////////////
+            // 2o gráfico (Temperaturas medias Mínimas)
+            ////////////////
+
+            var elemSVGtempsMin = d3.select("div#container2")
+                .append("svg")
+                .attr("width","100%")
+                .attr("height",height)
+                .attr("preserveAspectRatio", "xMidYMid meet")
+                .attr("viewBox", "0 0 "+width+" "+height)
+                .classed("svg-content", true)
+                .style('background', '#F6F6F6')
+
+            tempsMedMin = [] // hay manera más directa de hacer esto?
+            for (i=0; i<datos.length; i++) {
+                tempsMedMin.push(d3.min(
+                    datos[i].temMedMin.map( x => parseInt(x, 10) )
+                    )/10)
+            }
+            //tempsMedMin = Array(52).fill(-9) //debug
+            var scaleYMinTemps = d3.scaleLinear()
+                .domain([15,-10])
+                .range([height-margin.bottom, margin.top])
+            // escala de colores para temperaturas mínimas:
+            var minTempColorScale = d3.scaleLinear()
+                .domain(tempsMedMin)
+                // de azul claro a azul oscuro:
+                .range(["#e0f3f8", "#abd9e9", "#74add1", "#7C75B4", "#5F3695"]);
+
+            // pintar eje X
+            elemSVGtempsMin
+                .append("g")
+                .attr("transform","translate (0," + (height - margin.bottom) + ")")
+                .call(xAxis)
+                // inclinar etiquetas del eje X:
+                .selectAll("text")
+                  .style("text-anchor", "end")
+                  .attr("dx", "-.8em")
+                  .attr("dy", ".15em")
+                  .attr("transform", "rotate(-65)");
+
+            // definir eje y:
+            var yAxisMin = d3.axisLeft(scaleYMinTemps)
+
+            // pintar eje y:
+            elemSVGtempsMin
+                .append("g")
+                .attr("transform","translate (" + margin.left + ",0)")
+                .call(yAxisMin)
+            // título eje y:
+            elemSVGtempsMin.append("text")
+                .attr("x", -margin.left-20)
+                .attr("y", margin.top-10)
+                .style("text-anchor", "middle")
+                .text("Temp. media Mínima (ºC)");
+            elemSVGtempsMin.append("text")
+                .attr("x", -margin.left-20)
+                .attr("y", margin.top+10)
+                .style("text-anchor", "middle")
+                .text("[eje Y invertido]");
+
+            //TODO: barras hacia abajo
+            //      (he podido invertir ejes y etiquetas en index.bak,
+            //       pero no he conseguido que empiecen en -10 y tengan la altura adecuada)
+
+            elemSVGtempsMin
+                .selectAll("rect")
+                .data(datos)
+                .enter()
+                .append ("rect")
+                .attr("width", barWidth)
+                .attr('height', function (data, i) {
+                    return (height - margin.bottom)-scaleYMinTemps(tempsMedMin[i])
+                })
+                .attr('x', function (data, i) {
+                    return scaleX(i)
+                })
+                .attr('y', function (data, i) {
+                    return scaleYMinTemps(tempsMedMin[i])
+                })
+                // color de las barras:
+                .attr("fill", function (data, i) {
+                    return minTempColorScale(tempsMedMin[i])
+                })
+                .attr("fill-opacity", .6)
+                .on("mouseover", function (data, i) {
+                    pintarTooltip(data.ubicacion+": "+tempsMedMin[i])
+                    d3.select(this).attr("fill-opacity", 1);
+                })
+                .on("mouseout", function () {
+                    borrarTooltip()
+                    d3.select(this).attr("fill-opacity", .6);
+                })
+
+
+            var tooltip = d3.select("body")
+                .append("div")
+                .attr("class", "tooltip")
+
+            function pintarTooltip(value) {
+                tooltip
+                    .text(value)
+                    // COMPATIBILIDAD NAVEGADORES
+                    .style("top", d3.event.pageY + "px")
+                    .style("left", d3.event.pageX + "px")
+                    .transition()
+                    .style("opacity", 1)
+            }
+            function borrarTooltip(){
+                    tooltip
+                        .transition()
+                        .style("opacity",0)
+            }
+        })
+    </script>
+</head>
+<body>
+    <style>
+        .tooltip {
+            position: absolute;
+            background: white;
+            pointer-events: none;
+        }
+        /* https://chartio.com/resources/tutorials/how-to-resize-an-svg-when-the-window-is-resized-in-d3-js/ */
+        .svg-container {
+            display: inline-block;
+            position: relative;
+            width: 100%;
+            padding-bottom: 25%;
+        }
+        .svg-content {
+            display: inline-block;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+    <div id="container1" class="svg-container"></div>
+    <div id="container2" class="svg-container"></div>
+</body>
+</html>
