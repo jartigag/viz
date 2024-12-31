@@ -10,3 +10,5 @@
     - Python, Bash, SQL
 - [football-entropy](https://javier.artiga.es/football-entropy): How predictable football really is?
     - Python Jupyter Notebook
+- [spotify_data_analysis](https://javier.artiga.es/spotify_data_analysis): R Quarto notebook to analyse spotify streaming history
+    - R
