@@ -1,19 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
-<loc>https://javier.artiga.es/dataviz/index.htm</loc>
-<lastmod>2024-12-30T13:51:18+01:00</lastmod>
+<loc>https://javier.artiga.es/tfm</loc>
+<lastmod>2020-11-29T00:00:00+01:00</lastmod>
 </url>
 <url>
 <loc>https://javier.artiga.es/dataviz/autovias/</loc>
-<lastmod>2024-03-05T13:13:32+01:00</lastmod>
-</url>
-<url>
-<loc>https://javier.artiga.es/dataviz/autovías/</loc>
-<lastmod>2024-03-05T13:31:29+01:00</lastmod>
+<lastmod>2020-05-23T00:00:00+01:00</lastmod>
 </url>
 <url>
 <loc>https://javier.artiga.es/dataviz/temperaturas/</loc>
-<lastmod>2024-12-30T10:53:07+01:00</lastmod>
+<lastmod>2020-05-16T00:00:00+01:00</lastmod>
+</url>
+<url>
+<loc>https://javier.artiga.es/chess-blunders/</loc>
+<lastmod>2021-05-07T00:00:00+01:00</lastmod>
+</url>
+<url>
+<loc>https://javier.artiga.es/football-entropy/</loc>
+<lastmod>2021-02-09T00:00:00+01:00</lastmod>
+</url>
+<url>
+<loc>https://javier.artiga.es/spotify_data_analysis/</loc>
+<lastmod>2024-12-31T00:00:00+01:00</lastmod>
 </url>
 </urlset>
